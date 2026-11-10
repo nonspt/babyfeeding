@@ -5,6 +5,9 @@ create temporary table test_users (name text primary key, id uuid not null) on c
 insert into test_users values ('father',gen_random_uuid()),('mother',gen_random_uuid()),('outsider',gen_random_uuid()),('replacement',gen_random_uuid());
 insert into auth.users(id,aud,role) select id,'authenticated','authenticated' from test_users;
 create temporary table test_values (name text primary key,value jsonb) on commit drop;
+grant select on test_users to authenticated;
+grant all on test_values to authenticated;
+set local role authenticated;
 select set_config('request.jwt.claim.sub',(select id::text from test_users where name='father'),true);
 insert into test_values values ('created',public.babyfeeding_family_create('father'));
 do $$ begin
