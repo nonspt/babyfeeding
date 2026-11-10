@@ -16,5 +16,5 @@ jobs:
           curl --fail --silent --show-error "$url/src/app.js" | grep 'previewOnly:false' > /dev/null
           curl --fail --silent --show-error "$url/sw.js" | grep 'care-shell-v10' > /dev/null
           curl --fail --silent --show-error "$url/manifest.webmanifest" | node -e "let t='';process.stdin.on('data',x=>t+=x);process.stdin.on('end',()=>{let v=JSON.parse(t);if(v.start_url!=='./'||v.scope!=='./')process.exit(1)})"
-          curl --fail --silent --show-error --head "$url/sync/controller.mjs" | tr -d '\\r' | grep -Ei '^content-type: (text|application)/(javascript|ecmascript)' > /dev/null
+          curl --fail --silent --show-error --head "$url/sync/controller.mjs" | grep -Ei '^content-type: (text|application)/(javascript|ecmascript)' > /dev/null
           echo 'Published PWA resources passed'
