@@ -1,7 +1,6 @@
 name: Live synthetic sync verification
 on:
-  push:
-    branches: [live-smoke]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
