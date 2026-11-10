@@ -1,0 +1,12 @@
+const DB_NAME = 'yuejian-local-care';
+const DB_VERSION = 1;
+export function openDB() { return new Promise((resolve, reject) => { const req = indexedDB.open(DB_NAME, DB_VERSION); req.onupgradeneeded = () => { const db = req.result; if (!db.objectStoreNames.contains('records')) db.createObjectStore('records', {keyPath:'id'}); if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', {keyPath:'key'}); }; req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); req.onblocked = () => reject(new Error('数据库正被其他页面占用，请关闭其他页面后重试')); }); }
+function transaction(store, mode, fn) { return openDB().then(db => new Promise((resolve, reject) => { const tx = db.transaction(store, mode); let result; try { result = fn(tx.objectStore(store)); } catch(e) { tx.abort(); db.close(); reject(e); return; } tx.oncomplete = () => { db.close(); resolve(result?.result); }; tx.onerror = () => { db.close(); reject(tx.error); }; tx.onabort = () => { db.close(); reject(tx.error || new Error('操作已取消')); }; })); }
+export const allRecords = () => transaction('records','readonly', s => s.getAll());
+export const putRecord = record => transaction('records','readwrite', s => s.put(record));
+export const deleteRecord = id => transaction('records','readwrite', s => s.delete(id));
+export const getSetting = key => transaction('settings','readonly', s => s.get(key));
+export const setSetting = (key,value) => transaction('settings','readwrite', s => s.put({key,value}));
+export async function restore(data) { const db = await openDB(); return new Promise((resolve,reject) => { const tx=db.transaction(['records','settings'],'readwrite'); const records=tx.objectStore('records'), settings=tx.objectStore('settings'); records.clear(); settings.clear(); data.records.forEach(x=>records.put(x)); data.settings.forEach(x=>settings.put(x)); tx.oncomplete=()=>{db.close();resolve();}; tx.onerror=()=>{db.close();reject(tx.error);}; tx.onabort=()=>{db.close();reject(tx.error||new Error('恢复失败'));}; }); }
+export const allSettings = () => transaction('settings','readonly',s=>s.getAll());
+export async function finishTimer(record, timers) { const db=await openDB(); return new Promise((resolve,reject)=>{const tx=db.transaction(['records','settings'],'readwrite'); tx.objectStore('records').put(record); tx.objectStore('settings').put({key:'timers',value:timers});tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)};tx.onabort=()=>{db.close();reject(tx.error||new Error('保存计时失败'))}}); }
