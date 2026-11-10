@@ -1,0 +1,19 @@
+name: Verify published PWA
+on:
+  push:
+    branches: [pages-check]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployed resources
+        run: |
+          set -euo pipefail
+          url=https://nonspt.github.io/babyfeeding
+          curl --fail --silent --show-error "$url/" | grep -q '悦见成长'
+          curl --fail --silent --show-error "$url/src/app.js" | grep -q 'previewOnly:false'
+          curl --fail --silent --show-error "$url/sw.js" | grep -q 'care-shell-v10'
+          curl --fail --silent --show-error "$url/manifest.webmanifest" | node -e "let t='';process.stdin.on('data',x=>t+=x);process.stdin.on('end',()=>{let v=JSON.parse(t);if(v.start_url!=='./'||v.scope!=='./')process.exit(1)})"
+          echo 'Published PWA resources passed'
