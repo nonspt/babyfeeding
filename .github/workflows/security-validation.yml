@@ -1,0 +1,49 @@
+name: Isolated PostgreSQL security checks
+on:
+  push:
+    branches: [security-validation]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: temporary-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: temporary-test-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare isolated Auth shim
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          create role anon;
+          create role authenticated;
+          create schema auth;
+          create table auth.users (id uuid primary key, aud text, role text);
+          create function auth.uid() returns uuid language sql stable as $$
+            select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid
+          $$;
+          create schema extensions;
+          create extension pgcrypto with schema extensions;
+          SQL
+      - name: Apply draft schema in temporary PostgreSQL
+        run: |
+          psql -v ON_ERROR_STOP=1 -f security-tests/supabase-schema.sql
+          psql -v ON_ERROR_STOP=1 -f security-tests/family-invitations.sql
+      - name: Test authorization and invitation lifecycle
+        run: psql -v ON_ERROR_STOP=1 -f security-tests/supabase-security.sql
