@@ -94,11 +94,11 @@ begin
   return jsonb_build_object('ok',true);
 end $$;
 revoke all on function babyfeeding_private.family_create(text),babyfeeding_private.family_join(text,text,uuid),babyfeeding_private.family_new_invite() from public,anon;
-grant execute on function babyfeeding_private.family_create(text),babyfeeding_private.family_join(text,text),babyfeeding_private.family_new_invite() to authenticated;
+grant execute on function babyfeeding_private.family_create(text),babyfeeding_private.family_join(text,text,uuid),babyfeeding_private.family_new_invite() to authenticated;
 create or replace function public.babyfeeding_family_create(p_role text) returns jsonb language sql security invoker set search_path='' as $$ select babyfeeding_private.family_create(p_role) $$;
 create or replace function public.babyfeeding_family_join(p_role text,p_code text,p_expected_family uuid default null) returns jsonb language sql security invoker set search_path='' as $$ select babyfeeding_private.family_join(p_role,p_code,p_expected_family) $$;
 create or replace function public.babyfeeding_family_new_invite() returns jsonb language sql security invoker set search_path='' as $$ select babyfeeding_private.family_new_invite() $$;
 revoke all on function public.babyfeeding_family_create(text),public.babyfeeding_family_join(text,text,uuid),public.babyfeeding_family_new_invite() from public,anon;
-grant execute on function public.babyfeeding_family_create(text),public.babyfeeding_family_join(text,text),public.babyfeeding_family_new_invite() to authenticated;
+grant execute on function public.babyfeeding_family_create(text),public.babyfeeding_family_join(text,text,uuid),public.babyfeeding_family_new_invite() to authenticated;
 commit;
 
