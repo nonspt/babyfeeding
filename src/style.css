@@ -27,3 +27,8 @@ main.nurse-focus{min-height:100dvh;display:flex;align-items:center;padding:max(2
 .nurse-focus .nurse-totals{margin:28px 0 30px}
 @media(prefers-color-scheme:dark){.nurse-focus .nurse-head button{background:#f5a438;color:#241504}}
 @media(max-height:500px){.nurse-focus .nurse-total-label{margin:10px 0 2px}.nurse-focus .nurse-current{margin:0}.nurse-focus .nurse-totals{margin:12px 0 16px}}
+button:disabled{opacity:.55;cursor:not-allowed}
+.sync-error{padding:12px;border-radius:12px;background:#f7dfd7;color:#7e251b;font-size:14px;line-height:1.5}
+@media(prefers-color-scheme:dark){.sync-error{background:#4a2521;color:#ffd9d1}}
+.nurse-sync-status{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;margin:10px 0 0}.nurse-sync-status:empty{display:none}
+.family-code{text-align:center;font-size:42px;letter-spacing:.16em;font-weight:750;font-variant-numeric:tabular-nums;margin:24px 0}
