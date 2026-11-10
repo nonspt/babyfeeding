@@ -16,4 +16,3 @@ wait "$b"
 results=$(cat "$RUNNER_TEMP/babyfeeding-claim-1" "$RUNNER_TEMP/babyfeeding-claim-2" | sort | tr '\n' ' ')
 [[ "$results" == 'false true ' ]] || { echo 'Concurrent code use did not yield exactly one successful join'; exit 1; }
 echo 'Concurrent invitation single-use test passed'
-
