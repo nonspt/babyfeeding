@@ -47,3 +47,5 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f security-tests/family-invitations.sql
       - name: Test authorization and invitation lifecycle
         run: psql -v ON_ERROR_STOP=1 -f security-tests/supabase-security.sql
+      - name: Test simultaneous invite use
+        run: bash security-tests/supabase-concurrency.sh
