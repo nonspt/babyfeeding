@@ -1,0 +1,15 @@
+name: Live synthetic sync verification
+on:
+  push:
+    branches: [live-smoke]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Pages responds
+        run: curl --fail --location --silent --show-error --output /dev/null https://nonspt.github.io/babyfeeding/
+      - name: Test production API with synthetic data
+        run: node security-tests/supabase-live-smoke.mjs
